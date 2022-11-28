@@ -1,9 +1,8 @@
 import pygame
 from pygame import mixer
 from random import randint, uniform
-import sys
 
-def laser_shoot(laser_list, speed = 500):
+def laser_shoot(laser_list, speed = 200):
 	for rect in laser_list:
 		rect.y -= round(speed * dt)
 		if rect.bottom < 0:
@@ -20,23 +19,20 @@ def asteroid_update(asteroids_list, speed = 300):
 def score_props():
 	message = None
 
-	if points == 25:
-		message = '25 Points!'
+	if points > 25 and points < 35:
+			message = '25 Points!'
 
-	if points == 50:
-		message = '50 Points!'
+	if points > 50 and points < 65:
+			message = '50 Points!'
 
-	if points == 100:
-		message = 'Insane!!!'
+	if points > 100 and points < 115:
+			message = 'Insane!!!'
 
-	if points == 200:
-		message = 'Are you alright?'
+	if points > 200 and points < 215:
+			message = 'Are you alright?'
 
-	if points == 210:
-		message	= 'Exit on 10secs'
-
-	if points == 215:
-		sys.exit()
+	if points > 230 and points < 245:
+			message	= 'Close now...'
 
 	score_props_txt = f'{message}'
 	txt_surface = font_middle.render(message, False, 'White')
@@ -48,7 +44,7 @@ def display_time():
 	txt_surface = font.render(time , False, 'White')
 	display_surface.blit(txt_surface, (50, 50))
 
-def laser_timer(shoot, duration = 500):
+def laser_timer(shoot, duration = 800):
 	if not shoot:
 		current_time = pygame.time.get_ticks()
 		if current_time - shoot_time > duration:
@@ -94,11 +90,12 @@ pygame.time.set_timer(asteroid_timer, 140)
 # song settings
 mixer.init()
 mixer.music.load('songs/coolsong.wav')
-mixer.music.set_volume(0.04)
-mixer.music.play()
+mixer.music.set_volume(0.1)
+mixer.music.play(-1)
 
-# score
+# score and health points
 points = 0
+hp = 5
 
 while game_running:
 
@@ -121,7 +118,7 @@ while game_running:
 
 			# *peww* song
 			laser_fx = mixer.Sound('songs/laser.wav')
-			laser_fx.set_volume(0.12)
+			laser_fx.set_volume(0.1)
 			laser_fx.play()
 
 			# shoot time
@@ -146,30 +143,33 @@ while game_running:
 	spaceship_rect.center = pygame.mouse.get_pos()
 	laser_shoot(laser_list)
 	asteroid_update(asteroids_list)
-	shoot = laser_timer(shoot, 220)
+	shoot = laser_timer(shoot, 500)
 
-	# asteroid and ship collision
-	for asteroid_tuple in asteroids_list:
-		asteroid_rect = asteroid_tuple[0]
-
-		if spaceship_rect.colliderect(asteroid_rect):
-			# *boom* song
-			damage_fx = mixer.Sound('songs/explosion2.mp3')
-			damage_fx.set_volume(0.02)
-			damage_fx.play()
-
-	# laser and asteroids collision
-	for laser_rect in laser_list:
+	if hp >= 1:
+		# asteroid and ship collision
 		for asteroid_tuple in asteroids_list:
-			if laser_rect.colliderect(asteroid_tuple[0]):
+			asteroid_rect = asteroid_tuple[0]
+
+			if spaceship_rect.colliderect(asteroid_rect):
+				# *boom* song
+				damage_fx = mixer.Sound('songs/damage.wav')
+				damage_fx.set_volume(0.1)
+				damage_fx.play()
 				asteroids_list.remove(asteroid_tuple)
-				laser_list.remove(laser_rect)
+				hp -= 1
 
-				collide_fx = mixer.Sound('songs/explosion.wav')
-				collide_fx.set_volume(0.02)
-				collide_fx.play()
+		# laser and asteroids collision
+		for laser_rect in laser_list:
+			for asteroid_tuple in asteroids_list:
+				if laser_rect.colliderect(asteroid_tuple[0]):
+					asteroids_list.remove(asteroid_tuple)
+					#laser_list.remove(laser_rect)
 
-				points = points + 1
+					collide_fx = mixer.Sound('songs/explosion.wav')
+					collide_fx.set_volume(0.1)
+					collide_fx.play()
+
+					points += 1
 
 	# updates text/assets
 	display_surface.fill((0, 0, 0))
@@ -180,13 +180,25 @@ while game_running:
 	for rect in laser_list:
 		display_surface.blit(laser_surface, rect)
 
-	for asteroid_tuple in asteroids_list:
-		display_surface.blit(asteroids_surface, asteroid_tuple[0])
+	if hp >= 1:
+		for asteroid_tuple in asteroids_list:
+			display_surface.blit(asteroids_surface, asteroid_tuple[0])
 
 	# text
 	display_time()
 	score_txt = font.render(f'Score: {points}' , False, 'White')
 	display_surface.blit(score_txt, (240, 50))
-	score_props()
+	hp_txt = font.render(f'Health: {hp}', False, 'White')
+	display_surface.blit(hp_txt, (450, 50))
+	
+	if hp >= 1:
+		score_props()
+
+	if hp < 1:
+		hp = 0
+		game_over_txt = font.render('Game Over!', False, 'White')
+		exit_txt = font.render('Press ESC to exit', False, 'White')
+		display_surface.blit(exit_txt, (screen_widht / 2.64, screen_height / 1.6))
+		display_surface.blit(game_over_txt, (screen_widht / 2.5, screen_height / 2))
 
 	pygame.display.update()
