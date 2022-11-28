@@ -2,6 +2,7 @@ import pygame
 from pygame import mixer
 from random import randint, uniform
 import sys
+import time
 
 def laser_shoot(laser_list, speed = 500):
 	for rect in laser_list:
@@ -33,10 +34,7 @@ def score_props():
 		message = 'Are you alright?'
 
 	if points == 210:
-		message	= 'Exit on 10secs'
-
-	if points == 215:
-		sys.exit()
+		message	= 'Close now...'
 
 	score_props_txt = f'{message}'
 	txt_surface = font_middle.render(message, False, 'White')
@@ -163,7 +161,7 @@ while game_running:
 		for asteroid_tuple in asteroids_list:
 			if laser_rect.colliderect(asteroid_tuple[0]):
 				asteroids_list.remove(asteroid_tuple)
-				laser_list.remove(laser_rect)
+				#laser_list.remove(laser_rect)
 
 				collide_fx = mixer.Sound('songs/explosion.wav')
 				collide_fx.set_volume(0.02)
