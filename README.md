@@ -15,4 +15,7 @@ I decided to do this simple game project by a school event, so.. that's not enti
 - friendly neighborhood **YOUTUBE.COM**
 
 ## Updates 🔃
-- Game still crashes sometimes, I think it's amount of asteroids
+- ~~Game still crashes sometimes, I think it's amount of asteroids~~
+- Add health point system
+- Add game over condition
+- US and PT-BR versions on releases
